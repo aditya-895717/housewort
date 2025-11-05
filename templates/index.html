@@ -4,163 +4,537 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HomeWorth</title>
+    <title>HomeWorth - AI House Value Predictor</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inria+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --dark-bg: #1e293b;
+            --light-bg: #f1f5f9;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            padding: 10px 0;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-predict {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 40px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: bounceIn 0.8s ease;
+        }
+
+        .result-price {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-image {
+            width: 100%;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .house-specs {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .spec-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .icon-box {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-card {
+                padding: 25px;
+            }
+
+            .result-price {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <h1 class="text-center">House Value Prediction</h1>
-    <form action="/predict" class="container mb-3" method="post">
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <label for="area" class="form-label">Area (in square feet)</label>
-                <input type="number" class="form-control" id="area" name="area" required />
-            </div>
-
-            <div class="col-md-6 mb-4">
-                <label for="bedrooms" class="form-label">Number of bedrooms:</label>
-                <input type="number" class="form-control" id="bedrooms" name="bedrooms" required />
-            </div>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-home"></i> HomeWorth</h1>
+            <p>AI-Powered House Value Prediction</p>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-4">
-                <label for="bathrooms" class="form-label">Number of bathrooms:</label>
-                <input type="number" class="form-control" id="bathrooms" name="bathrooms" required />
-            </div>
+        <!-- Form Card -->
+        <div class="form-card">
+            <form action="/predict" method="post" id="predictionForm">
+                <!-- Basic Information -->
+                <div class="section-title">
+                    <i class="fas fa-info-circle"></i> Basic Information
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="area" class="form-label">
+                            <i class="fas fa-ruler-combined"></i> Area (sq ft)
+                        </label>
+                        <input type="number" class="form-control" id="area" name="area" placeholder="e.g., 2500"
+                            required min="500" max="20000" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="bedrooms" class="form-label">
+                            <i class="fas fa-bed"></i> Bedrooms
+                        </label>
+                        <input type="number" class="form-control" id="bedrooms" name="bedrooms" placeholder="e.g., 3"
+                            required min="1" max="10" />
+                    </div>
+                </div>
 
-            <div class="col-md-6 mb-4">
-                <label for="stories" class="form-label">Number of stories:</label>
-                <input type="number" id="stories" name="stories" class="form-control" required />
-            </div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="bathrooms" class="form-label">
+                            <i class="fas fa-bath"></i> Bathrooms
+                        </label>
+                        <input type="number" class="form-control" id="bathrooms" name="bathrooms" placeholder="e.g., 2"
+                            required min="1" max="8" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="stories" class="form-label">
+                            <i class="fas fa-building"></i> Stories
+                        </label>
+                        <input type="number" class="form-control" id="stories" name="stories" placeholder="e.g., 2"
+                            required min="1" max="5" />
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="section-title">
+                    <i class="fas fa-star"></i> Property Features
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-road"></i> Main Road Access</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mainroad" id="mainroadYes"
+                                    value="yes" required />
+                                <label class="form-check-label" for="mainroadYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mainroad" id="mainroadNo"
+                                    value="no" />
+                                <label class="form-check-label" for="mainroadNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-door-open"></i> Guest Room</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="guestroom" id="guestroomYes"
+                                    value="yes" required />
+                                <label class="form-check-label" for="guestroomYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="guestroom" id="guestroomNo"
+                                    value="no" />
+                                <label class="form-check-label" for="guestroomNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-warehouse"></i> Basement</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="basement" id="basementYes"
+                                    value="yes" required />
+                                <label class="form-check-label" for="basementYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="basement" id="basementNo"
+                                    value="no" />
+                                <label class="form-check-label" for="basementNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-hot-tub"></i> Hot Water Heating</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="hotwaterheating" id="hotYes"
+                                    value="yes" required />
+                                <label class="form-check-label" for="hotYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="hotwaterheating" id="hotNo"
+                                    value="no" />
+                                <label class="form-check-label" for="hotNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-snowflake"></i> Air Conditioning</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="airconditioning" id="acYes"
+                                    value="yes" required />
+                                <label class="form-check-label" for="acYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="airconditioning" id="acNo"
+                                    value="no" />
+                                <label class="form-check-label" for="acNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><i class="fas fa-map-marker-alt"></i> Preferred Area</label>
+                        <div class="radio-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="prefarea" id="prefYes" value="yes"
+                                    required />
+                                <label class="form-check-label" for="prefYes">Yes</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="prefarea" id="prefNo" value="no" />
+                                <label class="form-check-label" for="prefNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Details -->
+                <div class="section-title">
+                    <i class="fas fa-cog"></i> Additional Details
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label for="parking" class="form-label">
+                            <i class="fas fa-car"></i> Parking Spaces
+                        </label>
+                        <select class="form-select" name="parking" id="parking" required>
+                            <option value="">-- Select --</option>
+                            <option value="0">None</option>
+                            <option value="1">1 Space</option>
+                            <option value="2">2 Spaces</option>
+                            <option value="3">3 Spaces</option>
+                            <option value="4">4+ Spaces</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="furnishing_status" class="form-label">
+                            <i class="fas fa-couch"></i> Furnishing Status
+                        </label>
+                        <select class="form-select" name="furnishing_status" id="furnishing_status" required>
+                            <option value="">-- Select --</option>
+                            <option value="furnished">Fully Furnished</option>
+                            <option value="semi-furnished">Semi-Furnished</option>
+                            <option value="unfurnished">Unfurnished</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-predict">
+                        <i class="fas fa-calculator"></i> Calculate Value
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-4 tc">
-                <label for="mainroad" class="form-label">Is the house close to mainroad:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="mainroad" id="mainroadyesOption" value="yes" />
-                    <label for="mainroadyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="mainroad" id="mainroadnoOption" value="no" />
-                    <label for="mainroadnoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4 tc">
-                <label for="guestroom" class="form-label">Is guest room available:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="guestroom" id="guestyesOption" value="yes" />
-                    <label for="guestyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="guestroom" id="guestnoOption" value="no" />
-                    <label for="guestnoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-4 tc">
-                <label for="basement" class="form-label">Does the house have basement:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="basement" id="baseyesOption" value="yes" />
-                    <label for="baseyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="basement" id="basenoOption" value="no" />
-                    <label for="basenoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4 tc">
-                <label for="hotwaterheating" class="form-label">Is water heating facility available:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="hotwaterheating" id="hotyesOption" value="yes" />
-                    <label for="hotyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="hotwaterheating" id="hotnoOption" value="no" />
-                    <label for="hotnoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-4 tc">
-                <label for="airconditioning" class="form-label">Is Air Conditioning Facilty Available:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="airconditioning" id="airyesOption" value="yes" />
-                    <label for="airyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="airconditioning" id="airnoOption" value="no" />
-                    <label for="airnoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-
-            <div class="col-md-6 mb-4 tc">
-                <label for="prefarea" class="form-label">Is the house located in preferred area:</label>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="prefarea" id="prefyesOption" value="yes" />
-                    <label for="prefyesOption" class="form-check-label">Yes</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input type="radio" class="form-check-input" name="prefarea" id="prefnoOption" value="no" />
-                    <label for="prefnoOption" class="form-check-label">No</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-4 tc">
-                <label for="parking" class="form-label">No. of parking spaces:</label>
-                <select name="parking" id="parking">
-                    <option>--select--</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-4 tc">
-                <label for="furnishing_status" class="form-label">Furnishing status:</label>
-                <select name="furnishing_status" id="furnishing_status">
-                    <option>--select--</option>
-                    <option value="furnished">Furnished</option>
-                    <option value="semi-furnished">Semi Furnished</option>
-                    <option value="unfurnished">Unfurnished</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Predict</button>
-        </div>
-    </form>
-    <div class="text-center">
+        <!-- Result Card -->
         {% if prediction %}
-        <p class="display-5">
-            <span>The Estimated Value is: {{ prediction }} Lakhs</span>
-        </p>
+        <div class="result-card">
+            <h2><i class="fas fa-chart-line"></i> Estimated Property Value</h2>
+            <div class="result-price">₹ {{ prediction }} Lakhs</div>
+            <p class="mb-4">Based on current market trends and property specifications</p>
+
+            {% if house_image %}
+            <img src="{{ house_image }}" alt="House Architecture" class="result-image" />
+            {% endif %}
+
+            {% if input_data %}
+            <div class="house-specs">
+                <h4 class="mb-3"><i class="fas fa-list-check"></i> Property Specifications</h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-ruler-combined"></i></div>
+                            <span>{{ input_data.area }} sq ft</span>
+                        </div>
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-bed"></i></div>
+                            <span>{{ input_data.bedrooms }} Bedrooms</span>
+                        </div>
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-bath"></i></div>
+                            <span>{{ input_data.bathrooms }} Bathrooms</span>
+                        </div>
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-building"></i></div>
+                            <span>{{ input_data.stories }} Stories</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-car"></i></div>
+                            <span>{{ input_data.parking }} Parking</span>
+                        </div>
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-couch"></i></div>
+                            <span>{{ input_data.furnishing_status|title }}</span>
+                        </div>
+                        {% if input_data.airconditioning == 'yes' %}
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-snowflake"></i></div>
+                            <span>Air Conditioned</span>
+                        </div>
+                        {% endif %}
+                        {% if input_data.basement == 'yes' %}
+                        <div class="spec-item">
+                            <div class="icon-box"><i class="fas fa-warehouse"></i></div>
+                            <span>With Basement</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="/" class="btn btn-light btn-lg">
+                    <i class="fas fa-redo"></i> New Prediction
+                </a>
+            </div>
+        </div>
         {% endif %}
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
-        crossorigin="anonymous"></script>
+    <!-- Floor Plan Section (Add this after the house exterior image) -->
+    {% if floor_plan_image %}
+    <div class="mt-4">
+        <h4 class="mb-3"><i class="fas fa-drafting-compass"></i> Architectural Floor Plan</h4>
+        <img src="data:image/png;base64,{{ floor_plan_image }}" alt="Floor Plan"
+            style="max-width: 100%; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" />
+        <p class="text-muted mt-2" style="font-size: 12px;">
+            <i class="fas fa-info-circle"></i> Automated floor plan generated based on property specifications.
+            All dimensions are approximate and shown in feet.
+        </p>
+    </div>
+    {% endif %}
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Form submission animation
+        document.getElementById('predictionForm').addEventListener('submit', function (e) {
+            const btn = this.querySelector('.btn-predict');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculating...';
+            btn.disabled = true;
+        });
+
+        // Smooth scroll to result
+        {% if prediction %}
+        window.addEventListener('load', function () {
+            setTimeout(() => {
+                document.querySelector('.result-card').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 500);
+        });
+        {% endif %}
+    </script>
 </body>
 
 </html>
