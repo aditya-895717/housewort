@@ -1,0 +1,19 @@
+h1 {
+    padding-top: 5%;
+}
+
+form {
+    margin-top: 6rem;
+    
+}
+
+body {
+    font-family: "Inria Sans", sans-serif;
+    background-color: rgb(228, 166, 207);
+}
+
+@media (width <= 768px) {
+    .tc {
+        text-align: center;
+    }
+}
